@@ -6,6 +6,7 @@ namespace App\Manager;
 
 use Hyperf\Engine\Channel;
 use Hyperf\Engine\Coroutine;
+use Hyperf\Server\Exception\InvalidArgumentException;
 use Swoole\ArrayObject;
 use function FriendsOfHyperf\Helpers\logs;
 
@@ -130,8 +131,9 @@ class ChannelManager
     {
         try {
             $data = json_decode($message, true, 512, JSON_THROW_ON_ERROR);
-            assert(array_key_exists('gatewayId', $data));
-            assert(array_key_exists('machineId', $data));
+            if (!isset($data['gatewayId']) || !isset($data['machineId'])) {
+                throw new InvalidArgumentException('消息格式不正确');
+            }
 
             $key = $data['gatewayId'] . '_' . $data['machineId'];
 

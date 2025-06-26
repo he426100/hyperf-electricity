@@ -8,6 +8,10 @@ use App\Manager\ChannelManager;
 use App\Manager\GatewayManager;
 use App\Manager\ConnectionManager;
 use App\Util\Utils;
+use App\Exception\ControllerOfflineException;
+use App\Exception\InvalidRequestException;
+use App\Exception\InvalidBackMessageException;
+use Hyperf\Server\Exception\InvalidArgumentException;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Engine\Coroutine;
 use function FriendsOfHyperf\Helpers\logs;
@@ -55,12 +59,12 @@ class HttpService
                 return ['status' => 0, 'data' => 'mission already exists'];
             }
 
-            // 向tcp server发送请求，带http会话协程ID，用于返回数据时定位http会话
-            $data['missionId'] = $missionId;
             if (!$this->channel->check($missionId)) {
                 logs()->warning('mission not exists: ' . $missionId);
                 return ['status' => 0, 'data' => 'send message error'];
             }
+
+            // 向tcp server发送请求
             $message = $this->handleHttp($data);
             if (!is_null($message)) {
                 return $message;
@@ -75,8 +79,9 @@ class HttpService
 
             try {
                 $jsonData = json_decode($message, true, 512, JSON_THROW_ON_ERROR);
-                assert(array_key_exists('status', $jsonData));
-                assert(array_key_exists('data', $jsonData));
+                if (!isset($jsonData['status']) || !isset($jsonData['data'])) {
+                    throw new InvalidBackMessageException('back message error');
+                }
 
                 return $jsonData;
             } catch (\Throwable $e) {
@@ -99,8 +104,10 @@ class HttpService
      */
     public function handleHttp(array $data): ?array
     {
-        assert(array_key_exists('missionId', $data));
-        assert(array_key_exists('gatewayId', $data));
+        if (!isset($data['gatewayId'])) {
+            throw new InvalidArgumentException('create mission error');
+        }
+
         $gateway = $this->gateway->findGatewayByName($data['gatewayId']);
         if (!$gateway) {
             logs()->warning('gateway not on line: ' . $data['gatewayId']);
