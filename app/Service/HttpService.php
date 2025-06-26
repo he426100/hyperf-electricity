@@ -14,6 +14,7 @@ use App\Exception\InvalidBackMessageException;
 use Hyperf\Server\Exception\InvalidArgumentException;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Engine\Coroutine;
+use Hyperf\Server\Exception\ServerException;
 use Hyperf\Contract\StdoutLoggerInterface;
 
 /**
@@ -53,31 +54,26 @@ class HttpService
 
             // 校验
             if (!isset($data['machineId']) || !isset($data['gatewayId'])) {
-                return ['status' => 0, 'data' => 'create mission error'];
+                throw new InvalidRequestException('create mission error');
             }
 
             // 同一个电表同一时间的操作只能有一个
             if (!$this->channel->acquireMissionSlot($data['gatewayId'], $data['machineId'], $missionId, self::TIME_OUT)) {
-                $this->logger->warning('mission already exists: ' . $data['gatewayId'] . ' ' . $data['machineId']);
-                return ['status' => 0, 'data' => 'mission already exists'];
+                throw new InvalidRequestException('mission already exists: ' . $data['gatewayId'] . ' ' . $data['machineId']);
             }
 
             if (!$this->channel->check($missionId)) {
-                $this->logger->warning('mission not exists: ' . $missionId);
-                return ['status' => 0, 'data' => 'send message error'];
+                throw new ServerException('mission not exists: ' . $missionId);
             }
 
-            // 向tcp server发送请求
-            $message = $this->handleHttp($data);
-            if (!is_null($message)) {
-                return $message;
-            }
+            // 把数据发给tcp server
+            $this->handleHttp($data);
 
-            // 等待tcp server的返回
+            // 接收tcp server的返回
             $message = $this->channel->popMessage(Coroutine::id(), self::TIME_OUT);
             $this->logger->info("chanel message : {$message}");
             if ($message === false) {
-                return ['status' => 0, 'data' => 'mission time out'];
+                throw new ServerException('mission time out');
             }
 
             try {
@@ -89,23 +85,25 @@ class HttpService
                 return $jsonData;
             } catch (\Throwable $e) {
                 $this->logger->error('back error: ' . $e->getMessage());
+                throw $e;
             }
+        } catch (\Throwable $e) {
+            $this->logger->error($e->getMessage());
+            return ['status' => 0, 'data' => $e->getMessage()];
         } finally {
             // 无论成功、失败还是超时，最终都必须释放任务槽，让其他等待的协程可以继续
             if (!empty($data['gatewayId']) && !empty($data['machineId'])) {
                 $this->channel->releaseMissionSlot($data['gatewayId'], $data['machineId'], $missionId);
             }
         }
-
-        return ['status' => 0, 'data' => 'unkonw message: ' . $message];
     }
 
     /**
      * 
      * @param array $data 
-     * @return ?array 
+     * @return void 
      */
-    public function handleHttp(array $data): ?array
+    public function handleHttp(array $data): void
     {
         if (!isset($data['gatewayId'])) {
             throw new InvalidArgumentException('create mission error');
@@ -113,23 +111,20 @@ class HttpService
 
         $gateway = $this->gateway->findGatewayByName($data['gatewayId']);
         if (!$gateway) {
-            $this->logger->warning('gateway not on line: ' . $data['gatewayId']);
-            return ['status' => 0, 'data' => 'gateway not on line'];
+            throw new GatewayOfflineException('gateway not on line: ' . $data['gatewayId']);
         }
 
         $gatewayConnection = $this->connection->getConnection($gateway);
         if (!$gatewayConnection) {
-            $this->logger->warning('gateway not on line: ' . $gateway);
-            return ['status' => 0, 'data' => 'gateway not on line'];
+            throw new GatewayOfflineException('gateway not on line: ' . $gateway);
         }
 
         $result = $gatewayConnection->send(Utils::decodeHexString($data['data']));
         $this->logger->info('send message to gateway ' . $gateway . ': ' . $data['data'] . ', result: ' . ($result === false ? 'failed' : 'success'));
         if ($result === false) {
             // 发送失败，立即返回错误
-            return ['status' => 0, 'data' => 'failed to send command to gateway'];
+            throw new ServerException('failed to send command to gateway: ' . $data['gatewayId']);
         }
-        return null;
     }
 
     /**
