@@ -13,6 +13,7 @@
     "license": "Apache-2.0",
     "require": {
         "php": ">=8.0",
+        "friendsofhyperf/encryption": "^3.1",
         "friendsofhyperf/helpers": "~3.1.0",
         "friendsofhyperf/http-client": "~3.1.0",
         "friendsofhyperf/http-logger": "~3.1.0",

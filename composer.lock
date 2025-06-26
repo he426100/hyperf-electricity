@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f84882769cba1c92d92f6c2086cddb48",
+    "content-hash": "d808c725259c1b0556a1ccaf3f5e94e1",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -291,6 +291,85 @@
                 "source": "https://github.com/php-fig/http-message-util/tree/1.1.5"
             },
             "time": "2020-11-24T22:02:12+00:00"
+        },
+        {
+            "name": "friendsofhyperf/encryption",
+            "version": "v3.1.48",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/friendsofhyperf/encryption.git",
+                "reference": "ea3f8d346a0a97a7d0b57c8b7cbe2688dce2d24c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/friendsofhyperf/encryption/zipball/ea3f8d346a0a97a7d0b57c8b7cbe2688dce2d24c",
+                "reference": "ea3f8d346a0a97a7d0b57c8b7cbe2688dce2d24c",
+                "shasum": ""
+            },
+            "require": {
+                "hyperf/context": "~3.1.0",
+                "hyperf/contract": "~3.1.0",
+                "hyperf/di": "~3.1.0",
+                "hyperf/event": "~3.1.0",
+                "hyperf/stringable": "~3.1.0",
+                "hyperf/tappable": "~3.1.0"
+            },
+            "suggest": {
+                "opis/closure": "For encrypting closures."
+            },
+            "type": "library",
+            "extra": {
+                "hyperf": {
+                    "config": "FriendsOfHyperf\\Encryption\\ConfigProvider"
+                },
+                "branch-alias": {
+                    "dev-main": "3.1-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/Functions.php"
+                ],
+                "psr-4": {
+                    "FriendsOfHyperf\\Encryption\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Huangdijia",
+                    "email": "huangdijia@gmail.com",
+                    "homepage": "https://github.com/huangdijia"
+                }
+            ],
+            "description": "The encryption component for Hyperf.",
+            "keywords": [
+                "encryption",
+                "hyperf",
+                "php",
+                "swoole",
+                "v3.1"
+            ],
+            "support": {
+                "docs": "https://hyperf.fans",
+                "issues": "https://github.com/friendsofhyperf/components/issues",
+                "pull-request": "https://github.com/friendsofhyperf/components/pulls",
+                "source": "https://github.com/friendsofhyperf/components"
+            },
+            "funding": [
+                {
+                    "url": "https://hdj.me/sponsors/",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/huangdijia",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-11-28T08:49:14+00:00"
         },
         {
             "name": "friendsofhyperf/helpers",
