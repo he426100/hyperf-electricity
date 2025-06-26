@@ -6,4 +6,4 @@ namespace App\Exception;
 
 use Hyperf\Server\Exception\RuntimeException;
 
-class ControllerOfflineException extends RuntimeException {}
+class GatewayOfflineException extends RuntimeException {}
