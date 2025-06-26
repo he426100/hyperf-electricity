@@ -7,8 +7,9 @@ namespace App\Manager;
 use Hyperf\Engine\Channel;
 use Hyperf\Engine\Coroutine;
 use Hyperf\Server\Exception\InvalidArgumentException;
+use Hyperf\Di\Annotation\Inject;
+use Hyperf\Contract\StdoutLoggerInterface;
 use Swoole\ArrayObject;
-use function FriendsOfHyperf\Helpers\logs;
 
 /**
  * http会话管理器
@@ -16,6 +17,9 @@ use function FriendsOfHyperf\Helpers\logs;
  */
 class ChannelManager
 {
+    #[Inject]
+    protected StdoutLoggerInterface $logger;
+
     public const CHANNEL_NAME = 'http_recv';
 
     // 设置 Channel 最大存活时间（秒）
@@ -157,7 +161,7 @@ class ChannelManager
             $channel = $context->offsetGet(self::CHANNEL_NAME);
             return $channel->push(json_encode($data['result']), 1);
         } catch (\Throwable $e) {
-            logs()->error('pushMessage.error: ' . $e->getMessage());
+            $this->logger->error('pushMessage.error: ' . $e->getMessage());
         }
         return false;
     }
@@ -187,7 +191,7 @@ class ChannelManager
         if (isset($this->missionChannels[$key])) {
             $this->missionChannels[$key]['channel']->close();
             unset($this->missionChannels[$key]);
-            logs()->info("Channel {$key} has been cleaned up due to TTL.");
+            $this->logger->info("Channel {$key} has been cleaned up due to TTL.");
         }
     }
 }

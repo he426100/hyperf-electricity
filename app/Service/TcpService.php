@@ -9,10 +9,10 @@ use App\Manager\GatewayManager;
 use App\Manager\ConnectionManager;
 use App\Util\Utils;
 use Hyperf\Di\Annotation\Inject;
+use Hyperf\Contract\StdoutLoggerInterface;
 use FriendsOfHyperf\Http\Client\Http;
 use Swoole\Coroutine\Server\Connection;
 use function Hyperf\Support\env;
-use function FriendsOfHyperf\Helpers\logs;
 
 /**
  * @package App\Service
@@ -27,6 +27,9 @@ class TcpService
 
     #[Inject]
     protected ConnectionManager $connection;
+
+    #[Inject]
+    protected StdoutLoggerInterface $logger;
 
     private const MESSAGE_PING = '{"type":"ping","data":1}';
     private const MESSAGE_PONG = '{"type":"pong","data":1}';
@@ -45,9 +48,9 @@ class TcpService
         $name = "";
         if ($gatewayName = $this->gateway->findGatewayByFd($fd)) {
             $name = "machine " . $gatewayName;
-            logs()->info($fd . " is Gateway User: " . $name);
+            $this->logger->info($fd . " is Gateway User: " . $name);
         }
-        logs()->info("get message $name : $message");
+        $this->logger->info("get message $name : $message");
 
         // 检测 PING
         if ($message == self::MESSAGE_PING) {
@@ -66,7 +69,7 @@ class TcpService
                 $this->handleGateway($conn, $fd, $message);
             }
         } catch (\Throwable $e) {
-            logs()->error('handle error: ' . $e->getMessage() . ', message: ' . (isset($data) ? json_encode($data) : bin2hex($message)));
+            $this->logger->error('handle error: ' . $e->getMessage() . ', message: ' . (isset($data) ? json_encode($data) : bin2hex($message)));
         }
     }
 
@@ -81,7 +84,7 @@ class TcpService
     {
         $hexStr = bin2hex($data);
         $hexStr = strtoupper($hexStr);
-        logs()->info("hexStr : {$hexStr}");
+        $this->logger->info("hexStr : {$hexStr}");
 
         // 拆解
         if (strlen($hexStr) <= 4) {
@@ -103,7 +106,7 @@ class TcpService
                 'data' => $hexStr
             ]
         ]));
-        logs()->info('send message to http: ' . $hexStr . ', result: ' . ($result ? 'success' : 'failed'));
+        $this->logger->info('send message to http: ' . $hexStr . ', result: ' . ($result ? 'success' : 'failed'));
     }
 
     /**
@@ -121,7 +124,7 @@ class TcpService
 
         $sendMessage = self::LOGIN_RESP_DATA;
         $conn->send($sendMessage);
-        logs()->info("login success : $sendMessage");
+        $this->logger->info("login success : $sendMessage");
     }
 
     /**

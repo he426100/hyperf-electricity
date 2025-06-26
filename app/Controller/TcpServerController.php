@@ -7,10 +7,9 @@ namespace App\Controller;
 use App\Service\TcpService;
 use App\Manager\ConnectionManager;
 use Hyperf\Di\Annotation\Inject;
+use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Contract\OnReceiveInterface;
 use Swoole\Coroutine\Server\Connection;
-
-use function FriendsOfHyperf\Helpers\logs;
 
 class TcpServerController implements OnReceiveInterface
 {
@@ -19,6 +18,9 @@ class TcpServerController implements OnReceiveInterface
 
     #[Inject]
     protected ConnectionManager $connection;
+
+    #[Inject]
+    protected StdoutLoggerInterface $logger;
 
     /**
      * 
@@ -30,7 +32,7 @@ class TcpServerController implements OnReceiveInterface
      */
     public function onReceive($conn, int $fd, int $reactorId, string $data): void
     {
-        logs()->info("get tcp message: [{$fd}] {$data}");
+        $this->logger->info("get tcp message: [{$fd}] {$data}");
         $this->service->handle($conn, $fd, $data);
     }
 
@@ -42,7 +44,7 @@ class TcpServerController implements OnReceiveInterface
      */
     public function onClose($conn, int $fd): void
     {
-        logs()->info($fd . ' closed');
+        $this->logger->info($fd . ' closed');
         $this->connection->setConnection($fd, null);
         $this->service->handleClose($conn, $fd);
     }
@@ -55,7 +57,7 @@ class TcpServerController implements OnReceiveInterface
      */
     public function onConnect($conn, int $fd): void
     {
-        logs()->info('New Connection: ' . $fd);
+        $this->logger->info('New Connection: ' . $fd);
         $this->connection->setConnection($fd, $conn);
     }
 }

@@ -8,13 +8,13 @@ use App\Manager\ChannelManager;
 use App\Manager\GatewayManager;
 use App\Manager\ConnectionManager;
 use App\Util\Utils;
-use App\Exception\ControllerOfflineException;
+use App\Exception\GatewayOfflineException;
 use App\Exception\InvalidRequestException;
 use App\Exception\InvalidBackMessageException;
 use Hyperf\Server\Exception\InvalidArgumentException;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Engine\Coroutine;
-use function FriendsOfHyperf\Helpers\logs;
+use Hyperf\Contract\StdoutLoggerInterface;
 
 /**
  * @package App\Service
@@ -30,6 +30,9 @@ class HttpService
     #[Inject]
     protected ConnectionManager $connection;
 
+    #[Inject]
+    protected StdoutLoggerInterface $logger;
+
     public const TIME_OUT = 5;
 
     /**
@@ -41,7 +44,7 @@ class HttpService
      */
     public function handle(array $data): array
     {
-        logs()->info('get http message: ' . json_encode($data));
+        $this->logger->info('get http message: ' . json_encode($data));
 
         $missionId = $this->getMissionId();
 
@@ -55,12 +58,12 @@ class HttpService
 
             // 同一个电表同一时间的操作只能有一个
             if (!$this->channel->acquireMissionSlot($data['gatewayId'], $data['machineId'], $missionId, self::TIME_OUT)) {
-                logs()->warning('mission already exists: ' . $data['gatewayId'] . ' ' . $data['machineId']);
+                $this->logger->warning('mission already exists: ' . $data['gatewayId'] . ' ' . $data['machineId']);
                 return ['status' => 0, 'data' => 'mission already exists'];
             }
 
             if (!$this->channel->check($missionId)) {
-                logs()->warning('mission not exists: ' . $missionId);
+                $this->logger->warning('mission not exists: ' . $missionId);
                 return ['status' => 0, 'data' => 'send message error'];
             }
 
@@ -72,7 +75,7 @@ class HttpService
 
             // 等待tcp server的返回
             $message = $this->channel->popMessage(Coroutine::id(), self::TIME_OUT);
-            logs()->info("chanel message : {$message}");
+            $this->logger->info("chanel message : {$message}");
             if ($message === false) {
                 return ['status' => 0, 'data' => 'mission time out'];
             }
@@ -85,7 +88,7 @@ class HttpService
 
                 return $jsonData;
             } catch (\Throwable $e) {
-                logs()->error('back error: ' . $e->getMessage());
+                $this->logger->error('back error: ' . $e->getMessage());
             }
         } finally {
             // 无论成功、失败还是超时，最终都必须释放任务槽，让其他等待的协程可以继续
@@ -110,18 +113,18 @@ class HttpService
 
         $gateway = $this->gateway->findGatewayByName($data['gatewayId']);
         if (!$gateway) {
-            logs()->warning('gateway not on line: ' . $data['gatewayId']);
+            $this->logger->warning('gateway not on line: ' . $data['gatewayId']);
             return ['status' => 0, 'data' => 'gateway not on line'];
         }
 
         $gatewayConnection = $this->connection->getConnection($gateway);
         if (!$gatewayConnection) {
-            logs()->warning('gateway not on line: ' . $gateway);
+            $this->logger->warning('gateway not on line: ' . $gateway);
             return ['status' => 0, 'data' => 'gateway not on line'];
         }
 
         $result = $gatewayConnection->send(Utils::decodeHexString($data['data']));
-        logs()->info('send message to gateway ' . $gateway . ': ' . $data['data'] . ', result: ' . ($result === false ? 'failed' : 'success'));
+        $this->logger->info('send message to gateway ' . $gateway . ': ' . $data['data'] . ', result: ' . ($result === false ? 'failed' : 'success'));
         if ($result === false) {
             // 发送失败，立即返回错误
             return ['status' => 0, 'data' => 'failed to send command to gateway'];
