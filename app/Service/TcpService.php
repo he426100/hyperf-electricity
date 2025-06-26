@@ -10,7 +10,6 @@ use App\Manager\ConnectionManager;
 use App\Util\Utils;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Contract\StdoutLoggerInterface;
-use FriendsOfHyperf\Http\Client\Http;
 use Swoole\Coroutine\Server\Connection;
 use function Hyperf\Support\env;
 
@@ -136,23 +135,5 @@ class TcpService
     public function handleClose(Connection $conn, int $fd)
     {
         $this->gateway->logout($fd);
-    }
-
-    /**
-     * 
-     * @param string $url 
-     * @param array $postData 
-     * @param int $timeout 
-     * @return string 
-     */
-    protected function request(string $url, array $postData, int $timeout = 30): string
-    {
-        $response = Http::asForm()->timeout($timeout)->send('POST', $url, [
-            'form_params' => $postData
-        ]);
-        if (!$response->successful()) {
-            throw new \Exception('request failed: ' . $response->body());
-        }
-        return $response->body();
     }
 }
