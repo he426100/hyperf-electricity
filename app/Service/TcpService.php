@@ -31,7 +31,7 @@ class TcpService
     protected StdoutLoggerInterface $logger;
 
     private const MESSAGE_PING = '{"type":"ping","data":1}';
-    private const MESSAGE_PONG = '{"type":"pong","data":1}';
+    private const MESSAGE_PONG = '{"type":"ping","data":1}';
 
     private const MESSAGE_TYPE_LOGIN = 'login';
     private const LOGIN_RESP_DATA = '{"type":"login","data":1}';
