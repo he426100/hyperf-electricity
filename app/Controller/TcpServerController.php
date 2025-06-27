@@ -7,7 +7,7 @@ namespace App\Controller;
 use App\Service\TcpService;
 use App\Manager\ConnectionManager;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\Contract\StdoutLoggerInterface;
+use Psr\Log\LoggerInterface;
 use Hyperf\Contract\OnReceiveInterface;
 use Swoole\Coroutine\Server\Connection;
 
@@ -20,7 +20,7 @@ class TcpServerController implements OnReceiveInterface
     protected ConnectionManager $connection;
 
     #[Inject]
-    protected StdoutLoggerInterface $logger;
+    protected LoggerInterface $logger;
 
     /**
      * 

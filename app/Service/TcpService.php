@@ -9,7 +9,7 @@ use App\Manager\GatewayManager;
 use App\Manager\ConnectionManager;
 use App\Util\Utils;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\Contract\StdoutLoggerInterface;
+use Psr\Log\LoggerInterface;
 use Swoole\Coroutine\Server\Connection;
 use function Hyperf\Support\env;
 
@@ -28,7 +28,7 @@ class TcpService
     protected ConnectionManager $connection;
 
     #[Inject]
-    protected StdoutLoggerInterface $logger;
+    protected LoggerInterface $logger;
 
     private const MESSAGE_PING = '{"type":"ping","data":1}';
     private const MESSAGE_PONG = '{"type":"ping","data":1}';

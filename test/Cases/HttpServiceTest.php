@@ -10,7 +10,7 @@ use App\Manager\ConnectionManager;
 use App\Service\HttpService;
 use App\Util\Utils;
 use Hyperf\Testing\TestCase;
-use Hyperf\Contract\StdoutLoggerInterface;
+use Psr\Log\LoggerInterface;
 use Swoole\Coroutine\Server\Connection;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -26,7 +26,7 @@ class HttpServiceTest extends TestCase
         $post = ['machineId' => '01', 'data' => $data];
         $errMsg = 'create mission error';
 
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('error')->with($errMsg)->andReturn(null);
 
@@ -43,7 +43,7 @@ class HttpServiceTest extends TestCase
         $post = ['gatewayId' => 'modbus', 'data' => $data];
         $errMsg = 'create mission error';
 
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('error')->with($errMsg)->andReturn(null);
 
@@ -60,7 +60,7 @@ class HttpServiceTest extends TestCase
         $post = ['gatewayId' => 'modbus', 'machineId' => '01', 'data' => $data];
         $errMsg = 'mission already exists: modbus 01';
      
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('error')->with($errMsg)->andReturn(null);
 
@@ -82,7 +82,7 @@ class HttpServiceTest extends TestCase
         $post = ['gatewayId' => 'modbus', 'machineId' => '01', 'data' => $data];
         $errMsg = 'mission not exists: 1';
      
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('error')->with($errMsg)->andReturn(null);
 
@@ -111,7 +111,7 @@ class HttpServiceTest extends TestCase
             ],
         ];
 
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('info')->with('send message to gateway 1: ' . $data . ', result: success')->andReturn(null);
         $logger->shouldReceive('info')->with('chanel message : ' . json_encode($result))->andReturn(null);
@@ -148,7 +148,7 @@ class HttpServiceTest extends TestCase
         $post = ['gatewayId' => 'modbus', 'machineId' => '01', 'data' => $data];
         $errMsg = 'gateway not on line: modbus';
 
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('error')->with($errMsg)->andReturn(null);
 
@@ -174,7 +174,7 @@ class HttpServiceTest extends TestCase
         $post = ['gatewayId' => 'modbus', 'machineId' => '01', 'data' => $data];
         $errMsg = 'mission time out';
      
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('info')->with('send message to gateway 1: ' . $data . ', result: success')->andReturn(null);
         $logger->shouldReceive('info')->with('chanel message : ')->andReturn(null);
@@ -209,7 +209,7 @@ class HttpServiceTest extends TestCase
         $post = ['gatewayId' => 'modbus', 'machineId' => '01', 'data' => $data];
         $errMsg = 'failed to send command to gateway: modbus';
 
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('info')->with('send message to gateway 1: ' . $data . ', result: failed')->andReturn(null);
         $logger->shouldReceive('info')->with('chanel message : ')->andReturn(null);
@@ -243,7 +243,7 @@ class HttpServiceTest extends TestCase
         $post = ['gatewayId' => 'modbus', 'machineId' => '01', 'data' => $data];
         $result = '{{';
 
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get http message: ' . json_encode($post))->andReturn(null);
         $logger->shouldReceive('info')->with('send message to gateway 1: ' . $data . ', result: success')->andReturn(null);
         $logger->shouldReceive('info')->with('chanel message : ' . $result)->andReturn(null);

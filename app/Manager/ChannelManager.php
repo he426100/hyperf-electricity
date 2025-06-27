@@ -8,7 +8,7 @@ use Hyperf\Engine\Channel;
 use Hyperf\Engine\Coroutine;
 use Hyperf\Server\Exception\InvalidArgumentException;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\Contract\StdoutLoggerInterface;
+use Psr\Log\LoggerInterface;
 use Swoole\ArrayObject;
 
 /**
@@ -18,7 +18,7 @@ use Swoole\ArrayObject;
 class ChannelManager
 {
     #[Inject]
-    protected StdoutLoggerInterface $logger;
+    protected LoggerInterface $logger;
 
     public const CHANNEL_NAME = 'http_recv';
 

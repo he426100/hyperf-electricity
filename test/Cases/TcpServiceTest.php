@@ -10,7 +10,7 @@ use App\Manager\ConnectionManager;
 use App\Service\TcpService;
 use App\Util\Utils;
 use Hyperf\Testing\TestCase;
-use Hyperf\Contract\StdoutLoggerInterface;
+use Psr\Log\LoggerInterface;
 use Swoole\Coroutine\Server\Connection;
 use PHPUnit\Framework\Attributes\CoversClass;
 
@@ -25,7 +25,7 @@ class TcpServiceTest extends TestCase
         $data = '{"type":"login","key":"","name":"modbus"}';
         $sendMessage = '{"type":"login","data":1}';
 
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('1 is Gateway User: machine modbus')->andReturn(null);
         $logger->shouldReceive('info')->with('get message machine modbus : ' . $data)->andReturn(null);
         $logger->shouldReceive('info')->with('login success : ' . $sendMessage)->andReturn(null);
@@ -48,7 +48,7 @@ class TcpServiceTest extends TestCase
         $data = '{"type":"ping","data":1}';
         $sendMessage = '{"type":"ping","data":1}';
 
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('1 is Gateway User: machine modbus')->andReturn(null);
         $logger->shouldReceive('info')->with('get message machine modbus : ' . $data)->andReturn(null);
 
@@ -77,7 +77,7 @@ class TcpServiceTest extends TestCase
             ]
         ]);
         
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('1 is Gateway User: machine modbus')->andReturn(null);
         $logger->shouldReceive('info')->with('get message machine modbus : ' . $data)->andReturn(null);
         $logger->shouldReceive('info')->with('hexStr : 01000000')->andReturn(null);
@@ -101,7 +101,7 @@ class TcpServiceTest extends TestCase
     {
         $data = hex2bin('01000000');
         
-        $logger = $this->mock(StdoutLoggerInterface::class);
+        $logger = $this->mock(LoggerInterface::class);
         $logger->shouldReceive('info')->with('get message  : ' . $data)->andReturn(null);
 
         $gateway = $this->mock(GatewayManager::class);

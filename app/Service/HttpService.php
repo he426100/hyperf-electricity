@@ -15,7 +15,7 @@ use Hyperf\Server\Exception\InvalidArgumentException;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Engine\Coroutine;
 use Hyperf\Server\Exception\ServerException;
-use Hyperf\Contract\StdoutLoggerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * @package App\Service
@@ -32,7 +32,7 @@ class HttpService
     protected ConnectionManager $connection;
 
     #[Inject]
-    protected StdoutLoggerInterface $logger;
+    protected LoggerInterface $logger;
 
     public const TIME_OUT = 5;
 
